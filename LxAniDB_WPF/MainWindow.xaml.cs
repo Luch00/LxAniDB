@@ -282,7 +282,7 @@ namespace LxAniDB_WPF
                 // Login if not logged in yet
                 WriteLog("Login...");
                 string s = "AUTH user=" + Properties.Settings.Default.username + "&pass=" + ObfuscatePW.ToInsecureString(ObfuscatePW.DecryptString(Properties.Settings.Default.password)) + "&protover=3&client=lxanidb&clientver=1";
-                WriteLog("Packet: " + s);
+                //WriteLog("Packet: " + s);
                 SendPacket(s);
                 logoutTimer.Start();
             }
@@ -400,17 +400,6 @@ namespace LxAniDB_WPF
                 this.msgLog.AppendText("<" + time + ">" + msg + "\n");
             }
         }
-        
-        private void btnTest_Click(object sender, RoutedEventArgs e)
-        {
-            //history = files;
-            foreach (string file in files)
-            {
-                history.Add(System.IO.Path.GetFileName(file));
-            }
-            //WriteLog("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-            //BuildPacketString("");
-        }
 
         private void btnHistory_Click(object sender, RoutedEventArgs e)
         {
@@ -418,15 +407,6 @@ namespace LxAniDB_WPF
             historyDialog.Owner = this;
             historyDialog.ShowDialog();
             historyDialog = null;
-            //if (historyDialog.DialogResult.HasValue && historyDialog.DialogResult.Value)
-            //{
-            //    Properties.Settings.Default.Save();
-            //}
-        }
-
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            
         }
 
         private void ReadHistory()

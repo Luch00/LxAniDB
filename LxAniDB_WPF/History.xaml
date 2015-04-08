@@ -1,11 +1,25 @@
 ﻿<Window x:Class="LxAniDB_WPF.History"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="History" Height="338" Width="503" Closing="Window_Closing">
+        Title="History" Height="338" Width="503" Closing="Window_Closing" WindowStartupLocation="CenterOwner" Icon="icon.ico">
     <Grid>
         <ListBox x:Name="listHistory" Margin="10,10,10,46" SelectionMode="Extended"/>
-        <Button x:Name="btnClear" Content="Remove Selected" HorizontalAlignment="Left" Margin="10,270,0,0" VerticalAlignment="Top" Width="110" Click="btnClear_Click"/>
-        <Button x:Name="btnClearAll" Content="Remove All" HorizontalAlignment="Left" Margin="125,270,0,0" VerticalAlignment="Top" Width="110" Click="btnClearAll_Click"/>
+        <Button x:Name="btnClear" Content="Remove Selected" HorizontalAlignment="Left" Margin="10,270,0,0" VerticalAlignment="Top" Width="110" Click="btnClear_Click" Style="{DynamicResource RoundedButton}" BorderBrush="#95FFFFFF" Height="24">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                    <GradientStop Color="#FFC9C1C1" Offset="0.967"/>
+                    <GradientStop Color="#FFF0F0F0" Offset="0.829"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <Button x:Name="btnClearAll" Content="Remove All" HorizontalAlignment="Left" Margin="125,270,0,0" VerticalAlignment="Top" Width="110" Click="btnClearAll_Click" Style="{DynamicResource RoundedButton}" BorderBrush="#95FFFFFF" Height="24">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                    <GradientStop Color="#FFC9C1C1" Offset="0.967"/>
+                    <GradientStop Color="#FFF0F0F0" Offset="0.829"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
 
     </Grid>
 </Window>

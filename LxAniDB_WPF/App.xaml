@@ -5,45 +5,52 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          
-    	<Style x:Key="ProgressBarStyle1" TargetType="{x:Type ProgressBar}">
-    		<Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-    		<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-    		<Setter Property="BorderBrush" Value="#00000000"/>
-    		<Setter Property="BorderThickness" Value="1"/>
-    		<Setter Property="Template">
-    			<Setter.Value>
-    				<ControlTemplate TargetType="{x:Type ProgressBar}">
-    					<Themes:ClassicBorderDecorator x:Name="TemplateRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" BorderStyle="ThinPressed" Background="{TemplateBinding Background}">
-    						<DockPanel x:Name="PART_Track" LastChildFill="False" Margin="0,0,2,2">
-    							<Rectangle x:Name="PART_Indicator" RadiusY="0" Style="{DynamicResource RectangleStyle1}">
-    								<Rectangle.Resources>
-    									<Style x:Key="RectangleStyle1" TargetType="{x:Type Rectangle}">
-    										<Setter Property="StrokeDashArray" Value="1 0"/>
-    										<Setter Property="Fill">
-    											<Setter.Value>
-    												<ImageBrush ImageSource="bakabakabakabaka.jpg" TileMode="FlipY" Stretch="UniformToFill"/>
-    											</Setter.Value>
-    										</Setter>
-    										<Setter Property="Stroke" Value="{x:Null}"/>
-    										<Setter Property="OpacityMask" Value="{x:Null}"/>
-    									</Style>
-    								</Rectangle.Resources>
-    							</Rectangle>
-    						</DockPanel>
-    					</Themes:ClassicBorderDecorator>
-    					<ControlTemplate.Triggers>
-    						<Trigger Property="Orientation" Value="Vertical">
-    							<Setter Property="LayoutTransform" TargetName="TemplateRoot">
-    								<Setter.Value>
-    									<RotateTransform Angle="-90"/>
-    								</Setter.Value>
-    							</Setter>
-    						</Trigger>
-    					</ControlTemplate.Triggers>
-    				</ControlTemplate>
-    			</Setter.Value>
-    		</Setter>
-    	</Style>
+    	<ResourceDictionary>
+    		<ResourceDictionary.MergedDictionaries>
+    			<ResourceDictionary Source="RoundedButton.xaml"/>
+    		</ResourceDictionary.MergedDictionaries>
          
+    		<Style x:Key="ProgressBarStyle1" TargetType="{x:Type ProgressBar}">
+    			<Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+    			<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+    			<Setter Property="BorderBrush" Value="#00000000"/>
+    			<Setter Property="BorderThickness" Value="1"/>
+    			<Setter Property="Template">
+    				<Setter.Value>
+    					<ControlTemplate TargetType="{x:Type ProgressBar}">
+    						<Themes:ClassicBorderDecorator x:Name="TemplateRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" BorderStyle="ThinPressed" Background="{TemplateBinding Background}">
+    							<DockPanel x:Name="PART_Track" LastChildFill="False" Margin="0,0,2,2" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+    								<Rectangle x:Name="PART_Indicator" RadiusY="4" Style="{DynamicResource RectangleStyle1}" RadiusX="4">    									
+    									<Rectangle.Fill>
+    										<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+    											<GradientStop Color="Black" Offset="1"/>
+    											<GradientStop Color="#FFBF60F5" Offset="0.31"/>
+    											<GradientStop Color="#FF1D1423" Offset="0.961"/>
+    										</LinearGradientBrush>
+    									</Rectangle.Fill>
+    									<Rectangle.Stroke>
+    										<LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+    											<GradientStop Color="Black" Offset="1"/>
+    											<GradientStop Color="#FFD792FF"/>
+    											<GradientStop Color="#FF6B497F" Offset="0.83"/>
+    										</LinearGradientBrush>
+    									</Rectangle.Stroke>
+    								</Rectangle>
+    							</DockPanel>
+    						</Themes:ClassicBorderDecorator>
+    						<ControlTemplate.Triggers>
+    							<Trigger Property="Orientation" Value="Vertical">
+    								<Setter Property="LayoutTransform" TargetName="TemplateRoot">
+    									<Setter.Value>
+    										<RotateTransform Angle="-90"/>
+    									</Setter.Value>
+    								</Setter>
+    							</Trigger>
+    						</ControlTemplate.Triggers>
+    					</ControlTemplate>
+    				</Setter.Value>
+    			</Setter>
+    		</Style>         
+    	</ResourceDictionary>         
     </Application.Resources>
 </Application>

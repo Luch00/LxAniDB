@@ -1,7 +1,7 @@
 ﻿<Window x:Class="LxAniDB_WPF.History"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="History" Height="338" Width="503" Closing="Window_Closing" WindowStartupLocation="CenterOwner" Icon="icon.ico">
+        Title="History" Height="338" Width="503" Closing="Window_Closing" WindowStartupLocation="CenterOwner" Icon="icon.ico" ResizeMode="NoResize">
     <Grid>
         <ListBox x:Name="listHistory" Margin="10,10,10,46" SelectionMode="Extended"/>
         <Button x:Name="btnClear" Content="Remove Selected" HorizontalAlignment="Left" Margin="10,270,0,0" VerticalAlignment="Top" Width="110" Click="btnClear_Click" Style="{DynamicResource RoundedButton}" BorderBrush="#95FFFFFF" Height="24">

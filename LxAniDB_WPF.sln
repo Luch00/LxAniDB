@@ -5,6 +5,11 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LxAniDB_WPF", "LxAniDB_WPF\LxAniDB_WPF.csproj", "{6349C936-DE0F-477A-B89E-B3D829CE378A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{31ED353D-9028-496B-A398-A3610436B771}"
+	ProjectSection(SolutionItems) = preProject
+		Release\LxAniDB.exe = Release\LxAniDB.exe
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

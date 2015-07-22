@@ -35,7 +35,7 @@ namespace LxAniDB_WPF
         private Action cancelWork;
         private string sessionKey = string.Empty;
         private string currentPacket = string.Empty;
-        private TimeSpan lastSent = DateTime.Now.TimeOfDay;
+        private DateTime lastSent = DateTime.UtcNow;
         private DispatcherTimer logoutTimer;
         private TaskScheduler context = TaskScheduler.FromCurrentSynchronizationContext();
 
@@ -282,31 +282,28 @@ namespace LxAniDB_WPF
                 // Login if not logged in yet
                 WriteLog("Login...");
                 string s = "AUTH user=" + Properties.Settings.Default.username + "&pass=" + ObfuscatePW.ToInsecureString(ObfuscatePW.DecryptString(Properties.Settings.Default.password)) + "&protover=3&client=lxanidb&clientver=1";
-                //WriteLog("Packet: " + s);
                 SendPacket(s);
                 logoutTimer.Start();
             }
             SendPacket(v + "&s=" + sessionKey);
-            // Send packet with session key
-            // Receive reply
-            // if no reply, cancel hashing
         }
 
         private void SendPacket(string packet)
         {
             logoutTimer.Stop();
             logoutTimer.Start();
-            if ((DateTime.Now.TimeOfDay.TotalSeconds - lastSent.TotalSeconds) < Properties.Settings.Default.delay)
-            {
-                WriteLog("Delay");
-                Thread.Sleep(Properties.Settings.Default.delay * 1000);
+            TimeSpan elapsed = DateTime.UtcNow - this.lastSent;
+            if (elapsed.TotalSeconds < Properties.Settings.Default.delay)
+            {   
+                //WriteLog("Delay");
+                Thread.Sleep(TimeSpan.FromSeconds(Properties.Settings.Default.delay - elapsed.TotalSeconds));
             }
             this.currentPacket = packet;
             this.udpClient.Connect(Properties.Settings.Default.remoteServer, Properties.Settings.Default.remotePort);
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, Properties.Settings.Default.localPort);
 
             byte[] content = Encoding.ASCII.GetBytes(packet);
-            this.lastSent = DateTime.Now.TimeOfDay;
+            this.lastSent = DateTime.UtcNow;
             this.udpClient.Send(content, content.Length);
             byte[] response = udpClient.Receive(ref endPoint);
             if (response.Length > 0)

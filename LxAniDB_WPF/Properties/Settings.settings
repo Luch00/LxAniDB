@@ -2,22 +2,22 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LxAniDB_WPF.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="username" Type="System.String" Scope="User">
+    <Setting Name="username" Provider="PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="password" Type="System.String" Scope="User">
+    <Setting Name="password" Provider="PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="remoteServer" Type="System.String" Scope="User">
+    <Setting Name="remoteServer" Provider="PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)">api.anidb.net</Value>
     </Setting>
-    <Setting Name="remotePort" Type="System.Int32" Scope="User">
+    <Setting Name="remotePort" Provider="PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">9000</Value>
     </Setting>
-    <Setting Name="localPort" Type="System.Int32" Scope="User">
+    <Setting Name="localPort" Provider="PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">7119</Value>
     </Setting>
-    <Setting Name="delay" Type="System.Int32" Scope="User">
+    <Setting Name="delay" Provider="PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4</Value>
     </Setting>
   </Settings>

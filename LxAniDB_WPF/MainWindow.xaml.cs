@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -10,14 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 
@@ -31,7 +22,6 @@ namespace LxAniDB_WPF
 
         private BindingList<string> files = new BindingList<string>();
         private BindingList<string> history = new BindingList<string>();
-        //private bool running = false;
         private Action cancelWork;
         private string sessionKey = string.Empty;
         private string currentPacket = string.Empty;
@@ -39,7 +29,7 @@ namespace LxAniDB_WPF
         private DispatcherTimer logoutTimer;
         private TaskScheduler context = TaskScheduler.FromCurrentSynchronizationContext();
 
-        UdpClient udpClient;
+        private UdpClient udpClient;
 
         public MainWindow()
         {
@@ -91,9 +81,9 @@ namespace LxAniDB_WPF
             {
                 foreach (string file in dlg.FileNames)
                 {
-                    if (!CheckHistory(System.IO.Path.GetFileName(file)))
+                    if (!CheckHistory(Path.GetFileName(file)))
                     {
-                        files.Add(System.IO.Path.GetFullPath(file));
+                        files.Add(Path.GetFullPath(file));
                     }
                 }
             }
@@ -264,11 +254,11 @@ namespace LxAniDB_WPF
                             if (history.Count >= 20)
                             {
                                 history.RemoveAt(0);
-                                history.Add(System.IO.Path.GetFileName(file));
+                                history.Add(Path.GetFileName(file));
                             }
                             else
                             {
-                                history.Add(System.IO.Path.GetFileName(file));
+                                history.Add(Path.GetFileName(file));
                             }
                         },CancellationToken.None, TaskCreationOptions.None, context);
                 }
@@ -310,13 +300,11 @@ namespace LxAniDB_WPF
             {
                 string reply = Encoding.ASCII.GetString(response);
                 CheckMessage(reply);
-                //WriteLog("Reply: " + reply);
             }
             else
             {
                 WriteLog("Empty reply :(");
             }
-            // udpclient send & receive
         }
 
         private void CheckMessage(string s)
@@ -408,10 +396,10 @@ namespace LxAniDB_WPF
 
         private void ReadHistory()
         {
-            if (File.Exists(System.IO.Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml")))
+            if (File.Exists(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml")))
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(BindingList<string>));
-                StreamReader reader = new StreamReader(System.IO.Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml"));
+                StreamReader reader = new StreamReader(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml"));
                 history = (BindingList<string>)serializer.Deserialize(reader);
                 reader.Close();
             }
@@ -419,12 +407,12 @@ namespace LxAniDB_WPF
 
         private void SaveHistory()
         {
-            if (!Directory.Exists(System.IO.Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB")))
+            if (!Directory.Exists(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB")))
             {
-                Directory.CreateDirectory(System.IO.Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB"));
+                Directory.CreateDirectory(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB"));
             }
             XmlSerializer serializer = new XmlSerializer(typeof(BindingList<string>));
-            TextWriter writer = new StreamWriter(System.IO.Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml"));
+            TextWriter writer = new StreamWriter(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml"));
             serializer.Serialize(writer, history);
         }
 
@@ -443,10 +431,10 @@ namespace LxAniDB_WPF
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string file in files)
             {
-                string ext = System.IO.Path.GetExtension(file);
+                string ext = Path.GetExtension(file);
                 if(ext == ".mkv" || ext == ".avi" || ext == ".mp4")
                 {
-                    if (!CheckHistory(System.IO.Path.GetFileName(file)))
+                    if (!CheckHistory(Path.GetFileName(file)))
                     {
                         this.files.Add(file);
                     }

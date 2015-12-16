@@ -1,13 +1,13 @@
 ﻿<Window x:Class="LxAniDB_WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="LxAniDB v0.3" Height="489" Width="529" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="Window_Closing" Icon="icon.ico">
+        Title="LxAniDB v0.35" Height="489" Width="529" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="Window_Closing" Icon="icon.ico" DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid>
         <Menu x:Name="menu" Height="24" VerticalAlignment="Top">
             <MenuItem x:Name="btnSettings" Header="Settings" Margin="0" Click="btnSettings_Click"/>
             <MenuItem x:Name="btnHistory" Header="History" Margin="0" Click="btnHistory_Click"/>
         </Menu>
-        <ListBox x:Name="listBox" HorizontalAlignment="Left" Height="172" Margin="10,56,0,0" VerticalAlignment="Top" Width="372" AllowDrop="True" Drop="listBox_Drop"/>
+        <ListBox x:Name="listBox" HorizontalAlignment="Left" Height="172" Margin="10,56,0,0" VerticalAlignment="Top" Width="372" AllowDrop="True" Drop="listBox_Drop" ItemsSource="{Binding Files}"/>
         <Label x:Name="label" Content="Files:" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Padding="5,0"/>
         <Button x:Name="btnHash" Content="Start Hashing" Margin="395,56,0,0" VerticalAlignment="Top" Width="87" HorizontalAlignment="Left" Click="btnHash_Click" Style="{DynamicResource RoundedButton}" BorderBrush="#95FFFFFF" Height="24">
         	<Button.Background>

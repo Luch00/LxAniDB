@@ -9,7 +9,6 @@ using System.Windows;
 
 public class PortableSettingsProvider : SettingsProvider
 {
-
     const string SETTINGSROOT = "Settings";
     //XML Root Node
 

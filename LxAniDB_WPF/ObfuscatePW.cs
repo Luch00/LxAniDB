@@ -1,17 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LxAniDB_WPF
 {
-    internal class ObfuscatePW
+    class ObfuscatePW
     {
-        private static readonly byte[] entropy = Encoding.Unicode.GetBytes("GmWEoSaFtCaGr3J67D2ds2­fX");
+        static byte[] entropy = System.Text.Encoding.Unicode.GetBytes("GmWEoSaFtCaGr3J67D2ds2­fX");
 
-        public static string EncryptString(SecureString input)
+        public static string EncryptString(System.Security.SecureString input)
         {
             byte[] encryptedData = System.Security.Cryptography.ProtectedData.Protect(
-                Encoding.Unicode.GetBytes(ToInsecureString(input)),
+                System.Text.Encoding.Unicode.GetBytes(ToInsecureString(input)),
                 entropy,
                 System.Security.Cryptography.DataProtectionScope.CurrentUser);
             return Convert.ToBase64String(encryptedData);
@@ -25,7 +28,7 @@ namespace LxAniDB_WPF
                     Convert.FromBase64String(encryptedData),
                     entropy,
                     System.Security.Cryptography.DataProtectionScope.CurrentUser);
-                return ToSecureString(Encoding.Unicode.GetString(decryptedData));
+                return ToSecureString(System.Text.Encoding.Unicode.GetString(decryptedData));
             }
             catch
             {
@@ -46,7 +49,7 @@ namespace LxAniDB_WPF
 
         public static string ToInsecureString(SecureString input)
         {
-            string returnValue;
+            string returnValue = string.Empty;
             IntPtr ptr = System.Runtime.InteropServices.Marshal.SecureStringToBSTR(input);
             try
             {

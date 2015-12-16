@@ -5,42 +5,37 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LxAniDB_WPF"
         mc:Ignorable="d"
-        Title="Settings" Height="250" Width="300" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Icon="icon.ico">
+        Title="Settings" Height="253" Width="312" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Icon="icon.ico">
     <Grid>
-        <StackPanel Orientation="Horizontal" >
-            <StackPanel Orientation="Vertical">
-                <Label x:Name="label" Content="Username" HorizontalAlignment="Left" Margin="8,4,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
-                <TextBox x:Name="txtUsername" HorizontalAlignment="Left" Height="23" Margin="8,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TabIndex="1"/>
-                <Label x:Name="label1" Content="Password" HorizontalAlignment="Left" Margin="8,4,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
-                <PasswordBox x:Name="txtPassword" HorizontalAlignment="Left" Margin="8,4,0,0" VerticalAlignment="Top" Width="120" Height="23" TabIndex="2"/>
-                <Label x:Name="label2" Content="Server" HorizontalAlignment="Left" Margin="8,4,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
-                <TextBox x:Name="txtServer" HorizontalAlignment="Left" Height="23" Margin="8,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TabIndex="3"/>
-                <Button x:Name="button" Content="OK" HorizontalAlignment="Right" Margin="8,4,0,0" VerticalAlignment="Top" Width="75" Click="button_Click" IsDefault="True" Style="{DynamicResource RoundedButton}" BorderBrush="#95FFFFFF" Height="24" TabIndex="7">
-                    <Button.Background>
-                        <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
-                            <GradientStop Color="#FFC9C1C1" Offset="0.967"/>
-                            <GradientStop Color="#FFF0F0F0" Offset="0.829"/>
-                        </LinearGradientBrush>
-                    </Button.Background>
-                </Button>
-            </StackPanel>
-            <StackPanel Orientation="Vertical">
-                <Label x:Name="label3" Content="localPort" HorizontalAlignment="Left" Margin="14,4,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
-                <TextBox x:Name="txtLocal" HorizontalAlignment="Left" Height="23" Margin="14,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="txtLocal_PreviewTextInput" DataObject.Pasting="PastingHandler" TabIndex="4"/>
-                <Label x:Name="label4" Content="remotePort" HorizontalAlignment="Left" Margin="14,4,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
-                <TextBox x:Name="txtRemote" HorizontalAlignment="Left" Height="23" Margin="14,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="txtRemote_PreviewTextInput" DataObject.Pasting="PastingHandler" TabIndex="5"/>
-                <Label x:Name="label5" Content="Delay (seconds)" HorizontalAlignment="Left" Margin="14,4,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
-                <TextBox x:Name="txtDelay" HorizontalAlignment="Left" Height="23" Margin="14,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="txtDelay_PreviewTextInput" DataObject.Pasting="PastingHandler" ToolTip="Setting this too low can get you banned!" TabIndex="6"/>
-                <Button x:Name="button1" Content="Cancel" HorizontalAlignment="Left" Margin="14,4,0,0" VerticalAlignment="Top" Width="75" IsCancel="True" Style="{DynamicResource RoundedButton}" BorderBrush="#95FFFFFF" Height="24" TabIndex="8">
-                    <Button.Background>
-                        <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
-                            <GradientStop Color="#FFC9C1C1" Offset="0.967"/>
-                            <GradientStop Color="#FFF0F0F0" Offset="0.829"/>
-                        </LinearGradientBrush>
-                    </Button.Background>
-                </Button>
-                <Label x:Name="lblWarn" Content="" HorizontalAlignment="Left" Margin="14,8,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
-            </StackPanel>
-        </StackPanel>
+        <Label x:Name="label" Content="Username" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
+        <TextBox x:Name="txtUsername" HorizontalAlignment="Left" Height="23" Margin="10,31,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TabIndex="1"/>
+        <Label x:Name="label1" Content="Password" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
+        <Label x:Name="label2" Content="Server" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
+        <TextBox x:Name="txtServer" HorizontalAlignment="Left" Height="23" Margin="10,129,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TabIndex="3"/>
+        <Label x:Name="label3" Content="localPort" HorizontalAlignment="Left" Margin="164,10,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
+        <Label x:Name="label4" Content="remotePort" HorizontalAlignment="Left" Margin="164,59,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
+        <TextBox x:Name="txtLocal" HorizontalAlignment="Left" Height="23" Margin="164,31,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="txtLocal_PreviewTextInput" DataObject.Pasting="PastingHandler" TabIndex="4"/>
+        <TextBox x:Name="txtRemote" HorizontalAlignment="Left" Height="23" Margin="164,80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="txtRemote_PreviewTextInput" DataObject.Pasting="PastingHandler" TabIndex="5"/>
+        <Label x:Name="label5" Content="Delay (seconds)" HorizontalAlignment="Left" Margin="164,108,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
+        <TextBox x:Name="txtDelay" HorizontalAlignment="Left" Height="23" Margin="164,129,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="txtDelay_PreviewTextInput" DataObject.Pasting="PastingHandler" ToolTip="Setting this too low can get you banned!" TabIndex="6"/>
+        <Button x:Name="button" Content="OK" HorizontalAlignment="Left" Margin="55,187,0,0" VerticalAlignment="Top" Width="75" Click="button_Click" IsDefault="True" Style="{DynamicResource RoundedButton}" BorderBrush="#95FFFFFF" Height="24" TabIndex="7">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                    <GradientStop Color="#FFC9C1C1" Offset="0.967"/>
+                    <GradientStop Color="#FFF0F0F0" Offset="0.829"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <Button x:Name="button1" Content="Cancel" HorizontalAlignment="Left" Margin="164,187,0,0" VerticalAlignment="Top" Width="75" IsCancel="True" Style="{DynamicResource RoundedButton}" BorderBrush="#95FFFFFF" Height="24" TabIndex="8">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                    <GradientStop Color="#FFC9C1C1" Offset="0.967"/>
+                    <GradientStop Color="#FFF0F0F0" Offset="0.829"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <Label x:Name="lblWarn" Content="" HorizontalAlignment="Left" Margin="10,157,0,0" VerticalAlignment="Top" Padding="0,0,5,0"/>
+        <PasswordBox x:Name="txtPassword" HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Width="120" Height="23" TabIndex="2"/>
+
     </Grid>
 </Window>

@@ -288,7 +288,7 @@ namespace LxAniDB_WPF
             {
                 // Login if not logged in yet
                 WriteLog("LOGIN...");
-                string s = "AUTH user=" + Properties.Settings.Default.username + "&pass=" + ObfuscatePW.ToInsecureString(ObfuscatePW.DecryptString(Properties.Settings.Default.password)) + "&protover=3&client=lxanidb&clientver=1";
+                string s = "AUTH user=" + Properties.Settings.Default.username + "&pass=" + ObfuscatePW.ToInsecureString(ObfuscatePW.DecryptString(Properties.Settings.Default.password)) + "&protover=3&client=lxanidb&clientver=2";
                 if(!SendPacket(s))
                 {
                     return;

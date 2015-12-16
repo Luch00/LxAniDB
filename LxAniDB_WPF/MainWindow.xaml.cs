@@ -1,45 +1,61 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using Microsoft.Win32;
+using RHash;
 
 namespace LxAniDB_WPF
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : INotifyPropertyChanged
     {
 
-        private BindingList<string> files = new BindingList<string>();
+        private readonly BindingList<string> files = new BindingList<string>();
         private BindingList<string> history = new BindingList<string>();
         private Action cancelWork;
         private string sessionKey = string.Empty;
         private string currentPacket = string.Empty;
         private DateTime lastSent = DateTime.UtcNow;
-        private DispatcherTimer logoutTimer;
-        private TaskScheduler context = TaskScheduler.FromCurrentSynchronizationContext();
+        private readonly DispatcherTimer logoutTimer;
+        private readonly TaskScheduler context = TaskScheduler.FromCurrentSynchronizationContext();
+        private bool working = false;
 
-        private UdpClient udpClient;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private readonly UdpClient udpClient;
 
         public MainWindow()
         {
             this.udpClient = new UdpClient(Properties.Settings.Default.localPort);
+            // 10 second timeouts for sending and receiving
+            this.udpClient.Client.SendTimeout = 10000;
+            this.udpClient.Client.ReceiveTimeout = 10000;
             logoutTimer = new DispatcherTimer();
-            logoutTimer.Tick += new EventHandler(logoutTimer_Tick);
+            logoutTimer.Tick += logoutTimer_Tick;
             logoutTimer.Interval = new TimeSpan(0, 20, 0);
             InitializeComponent();
-            listBox.ItemsSource = files;
             ReadHistory();
+        }
+
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            handler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public BindingList<string> Files
+        {
+            get { return files; }
         }
 
         private void logoutTimer_Tick(object sender, EventArgs e)
@@ -47,15 +63,15 @@ namespace LxAniDB_WPF
             if (this.sessionKey != string.Empty)
             {
                 SendPacket("LOGOUT s=" + this.sessionKey);
+                logoutTimer.Stop();
             }
         }
 
         private void HasUser()
         {
-            if (Properties.Settings.Default.username == "" ||Properties.Settings.Default.password == "")
+            if (Properties.Settings.Default.username == "" || Properties.Settings.Default.password == "")
             {
-                Login loginDialog = new Login();
-                loginDialog.Owner = this;
+                Login loginDialog = new Login {Owner = this};
                 loginDialog.ShowDialog();
                 if (loginDialog.DialogResult.HasValue && loginDialog.DialogResult.Value)
                 {
@@ -70,12 +86,14 @@ namespace LxAniDB_WPF
 
         private void btnAddFiles_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.Multiselect = true;
-            dlg.Filter = "Video Files (*.mkv, *.mp4, *.avi) | *.mkv; *.mp4; *.avi";
-            dlg.Title = "Select files...";
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                Multiselect = true,
+                Filter = "Video Files (*.mkv, *.mp4, *.avi) | *.mkv; *.mp4; *.avi",
+                Title = "Select files..."
+            };
 
-            Nullable<bool> result = dlg.ShowDialog();
+            bool? result = dlg.ShowDialog();
 
             if (result == true)
             {
@@ -84,6 +102,7 @@ namespace LxAniDB_WPF
                     if (!CheckHistory(Path.GetFileName(file)))
                     {
                         files.Add(Path.GetFullPath(file));
+                        RaisePropertyChanged("Files");
                     }
                 }
             }
@@ -96,8 +115,7 @@ namespace LxAniDB_WPF
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            Settings settingsDialog = new Settings();
-            settingsDialog.Owner = this;
+            Settings settingsDialog = new Settings {Owner = this};
             settingsDialog.ShowDialog();
             if (settingsDialog.DialogResult.HasValue && settingsDialog.DialogResult.Value)
             {
@@ -130,6 +148,7 @@ namespace LxAniDB_WPF
             this.comboBox.IsEnabled = false;
             this.btnSettings.IsEnabled = false;
             this.btnHistory.IsEnabled = false;
+            this.working = true;
             this.btnHash.Content = "Stop Hashing";
 
             try
@@ -163,7 +182,7 @@ namespace LxAniDB_WPF
                     state = "3";
                 }
 
-                var progress = new Progress<int>((i) => this.progressBar.Value = i);
+                var progress = new Progress<int>(i => this.progressBar.Value = i);
                 await Task.Run(() => DoWork(token, progress, viewed, state), token);
             }
             catch (Exception ex)
@@ -177,6 +196,7 @@ namespace LxAniDB_WPF
             this.comboBox.IsEnabled = true;
             this.btnHistory.IsEnabled = true;
             this.btnSettings.IsEnabled = true;
+            this.working = false;
             this.btnHash.Content = "Start Hashing";
             this.cancelWork = null;
         }
@@ -187,30 +207,30 @@ namespace LxAniDB_WPF
             {
                 if (token.IsCancellationRequested)
                 {
+                    WriteLog("CANCELLED");
                     return;
                 }
                 using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                 {
                     double size = fs.Length;
                     StringBuilder sb = new StringBuilder();
+                    string finalHash = string.Empty;
                     if (size <= 9728000)
                     {
                         byte[] data = new byte[fs.Length];
                         fs.Read(data, 0, (int)size);
-                        byte[] hash = MD4Context.GetDigest(data).ToArray();
+                        finalHash = Hasher.GetHashForMsg(data, HashType.MD4);
                     }
                     else
                     {
                         // MD4 hash of 9500KB chunk
-                        double totalLength = 0;
                         double readBytes = 0;
                         double bufferSize = 9728000;
-                        List<byte[]> hashList = new List<byte[]>();
-
                         while (readBytes < size)
                         {
                             if (token.IsCancellationRequested)
                             {
+                                WriteLog("CANCELLED");
                                 return;
                             }
                             if (readBytes + bufferSize > size)
@@ -219,39 +239,27 @@ namespace LxAniDB_WPF
                             }
                             byte[] data = new byte[(int)bufferSize];
                             fs.Read(data, 0, (int)bufferSize);
+                            string hash = Hasher.GetHashForMsg(data, HashType.MD4);
+                            sb.Append(hash);
+                            data = null;
 
-                            byte[] hash = MD4Context.GetDigest(data).ToArray();
-                            hashList.Add(hash);
-                            totalLength += hash.Length;
+                            // Calculate progress % and report to progressbar
                             readBytes += bufferSize;
                             double p = (readBytes / size) * 100;
                             progress.Report((int)Math.Truncate(p));
-
                         }
-                        byte[] total = new byte[(int)totalLength];
-                        int offset = 0;
-                        foreach (byte[] b in hashList)
-                        {
-                            Buffer.BlockCopy(b, 0, total, offset, b.Length);
-                            offset += b.Length;
-                        }
-
-                        byte[] totalHash = MD4Context.GetDigest(total).ToArray();
-                        
-                        foreach (byte b in totalHash)
-                        {
-                            sb.Append(b.ToString("x2"));
-                        }
-                        hashList.Clear();
+                        finalHash = Hasher.GetHashForMsg(StringToByteArray(sb.ToString()), HashType.MD4);
+                        //WriteLog(finalHash);
                     }
                     if (token.IsCancellationRequested)
                     {
+                        WriteLog("CANCELLED");
                         return;
                     }
-                    BuildPacketString("MYLISTADD size=" + size + "&ed2k=" + sb.ToString() + "&state=" + state + "&viewed=" + viewed);
+                    LoginSendPacket("MYLISTADD size=" + size + "&ed2k=" + finalHash + "&state=" + state + "&viewed=" + viewed);
                     Task.Factory.StartNew(() =>
                         {
-                            if (history.Count >= 20)
+                            if (history.Count >= 100)
                             {
                                 history.RemoveAt(0);
                                 history.Add(Path.GetFileName(file));
@@ -265,45 +273,66 @@ namespace LxAniDB_WPF
             }
         }
 
-        private void BuildPacketString(string v)
+        public static byte[] StringToByteArray(String hex)
+        {
+            int NumberChars = hex.Length;
+            byte[] bytes = new byte[NumberChars / 2];
+            for (int i = 0; i < NumberChars; i += 2)
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            return bytes;
+        }
+
+        private void LoginSendPacket(string packet)
         {
             if (sessionKey == string.Empty)
             {
                 // Login if not logged in yet
-                WriteLog("Login...");
+                WriteLog("LOGIN...");
                 string s = "AUTH user=" + Properties.Settings.Default.username + "&pass=" + ObfuscatePW.ToInsecureString(ObfuscatePW.DecryptString(Properties.Settings.Default.password)) + "&protover=3&client=lxanidb&clientver=1";
-                SendPacket(s);
+                if(!SendPacket(s))
+                {
+                    return;
+                }
                 logoutTimer.Start();
             }
-            SendPacket(v + "&s=" + sessionKey);
+            SendPacket(packet + "&s=" + sessionKey);
         }
 
-        private void SendPacket(string packet)
-        {
-            logoutTimer.Stop();
-            logoutTimer.Start();
+        private bool SendPacket(string packet)
+        {   
+            if (logoutTimer.IsEnabled)
+            {
+                logoutTimer.Stop();
+                logoutTimer.Start();
+            }
             TimeSpan elapsed = DateTime.UtcNow - this.lastSent;
             if (elapsed.TotalSeconds < Properties.Settings.Default.delay)
-            {   
-                //WriteLog("Delay");
+            {
                 Thread.Sleep(TimeSpan.FromSeconds(Properties.Settings.Default.delay - elapsed.TotalSeconds));
             }
             this.currentPacket = packet;
-            this.udpClient.Connect(Properties.Settings.Default.remoteServer, Properties.Settings.Default.remotePort);
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, Properties.Settings.Default.localPort);
+            try
+            {
+                this.udpClient.Connect(Properties.Settings.Default.remoteServer, Properties.Settings.Default.remotePort);
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, Properties.Settings.Default.localPort);
 
-            byte[] content = Encoding.ASCII.GetBytes(packet);
-            this.lastSent = DateTime.UtcNow;
-            this.udpClient.Send(content, content.Length);
-            byte[] response = udpClient.Receive(ref endPoint);
-            if (response.Length > 0)
-            {
-                string reply = Encoding.ASCII.GetString(response);
-                CheckMessage(reply);
+                byte[] content = Encoding.ASCII.GetBytes(packet);
+                this.lastSent = DateTime.UtcNow;
+                this.udpClient.Send(content, content.Length);
+                byte[] response = udpClient.Receive(ref endPoint);
+                if (response.Length > 0)
+                {
+                    string reply = Encoding.ASCII.GetString(response);
+                    CheckMessage(reply);
+                }
+                return true;
             }
-            else
+            catch (Exception ex)
             {
-                WriteLog("Empty reply :(");
+                this.cancelWork();
+                WriteLog("SOMETHING WENT WRONG, TRY AGAIN LATER");
+                WriteLog("MESSAGE: " + ex.Message);
+                return false;
             }
         }
 
@@ -358,7 +387,7 @@ namespace LxAniDB_WPF
             }
         }
 
-        private string MessageBuilder(string[] parts, int index)
+        private static string MessageBuilder(string[] parts, int index)
         {
             string message = string.Empty;
             for (int i = index; i < parts.Length; i++)
@@ -379,30 +408,31 @@ namespace LxAniDB_WPF
             if (!msgLog.Dispatcher.CheckAccess())
             {
                 Dispatcher.Invoke(() => this.msgLog.AppendText("<" + time + ">" + msg + "\n"));
+                Dispatcher.Invoke(() => this.msgLog.ScrollToEnd());
             }
             else
             {
                 this.msgLog.AppendText("<" + time + ">" + msg + "\n");
+                this.msgLog.ScrollToEnd();
             }
         }
 
         private void btnHistory_Click(object sender, RoutedEventArgs e)
         {
-            History historyDialog = new History(ref history);
-            historyDialog.Owner = this;
+            History historyDialog = new History(ref history) {Owner = this};
             historyDialog.ShowDialog();
             historyDialog = null;
         }
 
         private void ReadHistory()
         {
-            if (File.Exists(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml")))
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(BindingList<string>));
-                StreamReader reader = new StreamReader(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml"));
-                history = (BindingList<string>)serializer.Deserialize(reader);
-                reader.Close();
-            }
+            if (!File.Exists(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml")))
+                return;
+
+            XmlSerializer serializer = new XmlSerializer(typeof(BindingList<string>));
+            StreamReader reader = new StreamReader(Path.Combine((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)), @"Luch\LxAniDB\History.xml"));
+            history = (BindingList<string>)serializer.Deserialize(reader);
+            reader.Close();
         }
 
         private void SaveHistory()
@@ -428,17 +458,21 @@ namespace LxAniDB_WPF
 
         private void HandleDrop(DragEventArgs e)
         {
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
+            if (!working && e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                string ext = Path.GetExtension(file);
-                if(ext == ".mkv" || ext == ".avi" || ext == ".mp4")
+                string[] dropFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
+                foreach (string file in dropFiles)
                 {
-                    if (!CheckHistory(Path.GetFileName(file)))
+                    string ext = Path.GetExtension(file);
+                    if (ext == ".mkv" || ext == ".avi" || ext == ".mp4")
                     {
-                        this.files.Add(file);
+                        if (!CheckHistory(Path.GetFileName(file)))
+                        {
+                            this.files.Add(file);
+                            RaisePropertyChanged("Files");
+                        }
                     }
-                }
+                } 
             }
         }
 

@@ -145,6 +145,7 @@ namespace LxAniDB_WPF
             this.btnAddFiles.IsEnabled = false;
             this.btnClear.IsEnabled = false;
             this.checkWatched.IsEnabled = false;
+            this.checkDeleteFiles.IsEnabled = false;
             this.comboBox.IsEnabled = false;
             this.btnSettings.IsEnabled = false;
             this.btnHistory.IsEnabled = false;
@@ -167,6 +168,11 @@ namespace LxAniDB_WPF
                 {
                     viewed = "1";
                 }
+                bool deleteFile = false;
+                if (checkDeleteFiles.IsChecked == true)
+                {
+                    deleteFile = true;
+                }
                 string state = "0";
                 int index = comboBox.SelectedIndex;
                 if (index == 0)
@@ -183,7 +189,7 @@ namespace LxAniDB_WPF
                 }
 
                 var progress = new Progress<int>(i => this.progressBar.Value = i);
-                await Task.Run(() => DoWork(token, progress, viewed, state), token);
+                await Task.Run(() => DoWork(token, progress, viewed, deleteFile, state), token);
             }
             catch (Exception ex)
             {
@@ -193,6 +199,7 @@ namespace LxAniDB_WPF
             this.btnAddFiles.IsEnabled = true;
             this.btnClear.IsEnabled = true;
             this.checkWatched.IsEnabled = true;
+            this.checkDeleteFiles.IsEnabled = true;
             this.comboBox.IsEnabled = true;
             this.btnHistory.IsEnabled = true;
             this.btnSettings.IsEnabled = true;
@@ -201,7 +208,7 @@ namespace LxAniDB_WPF
             this.cancelWork = null;
         }
 
-        private void DoWork(CancellationToken token, IProgress<int> progress, string viewed, string state)
+        private void DoWork(CancellationToken token, IProgress<int> progress, string viewed, bool deleteFile, string state)
         {
             foreach (string file in files)
             {
@@ -267,6 +274,10 @@ namespace LxAniDB_WPF
                             else
                             {
                                 history.Add(Path.GetFileName(file));
+                            }
+                            if (deleteFile)
+                            {
+                                File.Delete(file);
                             }
                         },CancellationToken.None, TaskCreationOptions.None, context);
                 }

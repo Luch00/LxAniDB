@@ -87,9 +87,6 @@
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
     <Compile Include="ObfuscatePW.cs" />
-    <Compile Include="PART_TrackControl.xaml.cs">
-      <DependentUpon>PART_TrackControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="PortableSettings1.cs" />
     <Compile Include="RHash\Bindings.cs" />
     <Compile Include="RHash\Hasher.cs" />
@@ -116,10 +113,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="PART_TrackControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="RoundedButton.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

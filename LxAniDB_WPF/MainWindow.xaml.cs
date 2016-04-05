@@ -11,6 +11,8 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using Microsoft.Win32;
 using RHash;
+using System.Diagnostics;
+using Win32FileIO;
 
 namespace LxAniDB_WPF
 {
@@ -33,9 +35,10 @@ namespace LxAniDB_WPF
         public event PropertyChangedEventHandler PropertyChanged;
 
         private readonly UdpClient udpClient;
-
+        private WinFileIO WFIO;
         public MainWindow()
         {
+            WFIO = new WinFileIO();
             this.udpClient = new UdpClient(Properties.Settings.Default.localPort);
             // 10 second timeouts for sending and receiving
             this.udpClient.Client.SendTimeout = 10000;
@@ -226,6 +229,8 @@ namespace LxAniDB_WPF
                         // MD4 hash of 9500KB chunk
                         double readBytes = 0;
                         double bufferSize = 9728000;
+                        //Console.WriteLine(sw.ElapsedMilliseconds);
+                        byte[] data = new byte[(int)bufferSize];
                         while (readBytes < size)
                         {
                             if (token.IsCancellationRequested)
@@ -236,20 +241,24 @@ namespace LxAniDB_WPF
                             if (readBytes + bufferSize > size)
                             {
                                 bufferSize = size - readBytes;
+                                data = new byte[(int)bufferSize];
                             }
-                            byte[] data = new byte[(int)bufferSize];
+                            //Console.WriteLine(sw.ElapsedMilliseconds + "b");
+                            //byte[] data = new byte[(int)bufferSize];
                             fs.Read(data, 0, (int)bufferSize);
                             string hash = Hasher.GetHashForMsg(data, HashType.MD4);
                             sb.Append(hash);
-                            data = null;
+                            //data = null;
 
                             // Calculate progress % and report to progressbar
                             readBytes += bufferSize;
                             double p = (readBytes / size) * 100;
                             progress.Report((int)Math.Truncate(p));
+                            //Console.WriteLine(sw.ElapsedMilliseconds + "a");
                         }
+                        data = null;
                         finalHash = Hasher.GetHashForMsg(StringToByteArray(sb.ToString()), HashType.MD4);
-                        //WriteLog(finalHash);
+                        WriteLog(finalHash);
                     }
                     if (token.IsCancellationRequested)
                     {
@@ -268,8 +277,10 @@ namespace LxAniDB_WPF
                             {
                                 history.Add(Path.GetFileName(file));
                             }
-                        },CancellationToken.None, TaskCreationOptions.None, context);
+                        }, CancellationToken.None, TaskCreationOptions.None, context);
                 }
+                //Console.WriteLine(sw.ElapsedMilliseconds);
+                //sw.Stop();
             }
         }
 
@@ -377,7 +388,7 @@ namespace LxAniDB_WPF
                     case "506":
                         this.sessionKey = string.Empty;
                         WriteLog(MessageBuilder(split, 1));
-                        SendPacket(currentPacket);
+                        LoginSendPacket(currentPacket);
                         break;
                     default:
                         WriteLog(MessageBuilder(split, 0));

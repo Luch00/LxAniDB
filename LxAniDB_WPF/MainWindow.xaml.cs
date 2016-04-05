@@ -11,6 +11,7 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using Microsoft.Win32;
 using RHash;
+using System.Collections.Generic;
 
 namespace LxAniDB_WPF
 {
@@ -29,10 +30,13 @@ namespace LxAniDB_WPF
         private readonly DispatcherTimer logoutTimer;
         private readonly TaskScheduler context = TaskScheduler.FromCurrentSynchronizationContext();
         private bool working = false;
+        private bool watchedChecked;
+        private bool deleteChecked;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         private readonly UdpClient udpClient;
+        private int selectedState;
 
         public MainWindow()
         {
@@ -44,6 +48,9 @@ namespace LxAniDB_WPF
             logoutTimer.Tick += logoutTimer_Tick;
             logoutTimer.Interval = new TimeSpan(0, 20, 0);
             InitializeComponent();
+            WatchedChecked = Properties.Settings.Default.watchedChecked;
+            DeleteChecked = Properties.Settings.Default.deleteChecked;
+            SelectedState = Properties.Settings.Default.selectedState;
             ReadHistory();
         }
 
@@ -53,9 +60,65 @@ namespace LxAniDB_WPF
             handler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public Dictionary<int, string> FileStates
+        {
+            get
+            {
+                return new Dictionary<int, string>
+                {
+                    [0] = "Unknown",
+                    [1] = "HDD",
+                    [2] = "CD",
+                    [3] = "Deleted"
+                };
+            }
+        }
+
         public BindingList<string> Files
         {
             get { return files; }
+        }
+
+        public bool WatchedChecked
+        {
+            get { return watchedChecked; }
+            set
+            {
+                if (value != watchedChecked)
+                {
+                    watchedChecked = value;
+                    Properties.Settings.Default.watchedChecked = value;
+                    RaisePropertyChanged("WatchedChecked");
+                }
+            }
+        }
+
+        public bool DeleteChecked
+        {
+            get { return deleteChecked; }
+            set
+            {
+                if (value != deleteChecked)
+                {
+                    deleteChecked = value;
+                    Properties.Settings.Default.deleteChecked = value;
+                    RaisePropertyChanged("DeleteChecked");
+                }
+            }
+        }
+
+        public int SelectedState
+        {
+            get { return selectedState; }
+            set
+            {
+                if (value != selectedState)
+                {
+                    selectedState = value;
+                    Properties.Settings.Default.selectedState = value;
+                    RaisePropertyChanged("SelectedState");
+                }
+            }
         }
 
         private void logoutTimer_Tick(object sender, EventArgs e)
@@ -164,32 +227,32 @@ namespace LxAniDB_WPF
                 var token = cancellationTokenSource.Token;
 
                 string viewed = "0";
-                if (checkWatched.IsChecked == true)
+                if (watchedChecked == true)
                 {
                     viewed = "1";
                 }
-                bool deleteFile = false;
+                /*bool deleteFile = false;
                 if (checkDeleteFiles.IsChecked == true)
                 {
                     deleteFile = true;
-                }
+                }*/
                 string state = "0";
-                int index = comboBox.SelectedIndex;
-                if (index == 0)
+                //int index = comboBox.SelectedIndex;
+                if (selectedState == 0)
                 {
                     state = "1";
                 }
-                else if (index == 1)
+                else if (selectedState == 1)
                 {
                     state = "2";
                 }
-                else if (index == 2)
+                else if (selectedState == 2)
                 {
                     state = "3";
                 }
 
                 var progress = new Progress<int>(i => this.progressBar.Value = i);
-                await Task.Run(() => DoWork(token, progress, viewed, deleteFile, state), token);
+                await Task.Run(() => DoWork(token, progress, viewed, deleteChecked, state), token);
             }
             catch (Exception ex)
             {
@@ -233,6 +296,7 @@ namespace LxAniDB_WPF
                         // MD4 hash of 9500KB chunk
                         double readBytes = 0;
                         double bufferSize = 9728000;
+                        byte[] data = new byte[(int)bufferSize];
                         while (readBytes < size)
                         {
                             if (token.IsCancellationRequested)
@@ -244,17 +308,18 @@ namespace LxAniDB_WPF
                             {
                                 bufferSize = size - readBytes;
                             }
-                            byte[] data = new byte[(int)bufferSize];
+                            //byte[] data = new byte[(int)bufferSize];
                             fs.Read(data, 0, (int)bufferSize);
                             string hash = Hasher.GetHashForMsg(data, HashType.MD4);
                             sb.Append(hash);
-                            data = null;
+                            //data = null;
 
                             // Calculate progress % and report to progressbar
                             readBytes += bufferSize;
                             double p = (readBytes / size) * 100;
                             progress.Report((int)Math.Truncate(p));
                         }
+                        data = null;
                         finalHash = Hasher.GetHashForMsg(StringToByteArray(sb.ToString()), HashType.MD4);
                         //WriteLog(finalHash);
                     }
@@ -388,7 +453,7 @@ namespace LxAniDB_WPF
                     case "506":
                         this.sessionKey = string.Empty;
                         WriteLog(MessageBuilder(split, 1));
-                        SendPacket(currentPacket);
+                        LoginSendPacket(currentPacket);
                         break;
                     default:
                         WriteLog(MessageBuilder(split, 0));
@@ -459,6 +524,7 @@ namespace LxAniDB_WPF
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            Properties.Settings.Default.Save();
             SaveHistory();
         }
 

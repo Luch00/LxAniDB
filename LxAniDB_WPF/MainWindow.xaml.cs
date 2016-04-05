@@ -11,8 +11,6 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using Microsoft.Win32;
 using RHash;
-using System.Diagnostics;
-using Win32FileIO;
 
 namespace LxAniDB_WPF
 {
@@ -35,10 +33,9 @@ namespace LxAniDB_WPF
         public event PropertyChangedEventHandler PropertyChanged;
 
         private readonly UdpClient udpClient;
-        private WinFileIO WFIO;
+
         public MainWindow()
         {
-            WFIO = new WinFileIO();
             this.udpClient = new UdpClient(Properties.Settings.Default.localPort);
             // 10 second timeouts for sending and receiving
             this.udpClient.Client.SendTimeout = 10000;
@@ -148,6 +145,7 @@ namespace LxAniDB_WPF
             this.btnAddFiles.IsEnabled = false;
             this.btnClear.IsEnabled = false;
             this.checkWatched.IsEnabled = false;
+            this.checkDeleteFiles.IsEnabled = false;
             this.comboBox.IsEnabled = false;
             this.btnSettings.IsEnabled = false;
             this.btnHistory.IsEnabled = false;
@@ -170,6 +168,11 @@ namespace LxAniDB_WPF
                 {
                     viewed = "1";
                 }
+                bool deleteFile = false;
+                if (checkDeleteFiles.IsChecked == true)
+                {
+                    deleteFile = true;
+                }
                 string state = "0";
                 int index = comboBox.SelectedIndex;
                 if (index == 0)
@@ -186,7 +189,7 @@ namespace LxAniDB_WPF
                 }
 
                 var progress = new Progress<int>(i => this.progressBar.Value = i);
-                await Task.Run(() => DoWork(token, progress, viewed, state), token);
+                await Task.Run(() => DoWork(token, progress, viewed, deleteFile, state), token);
             }
             catch (Exception ex)
             {
@@ -196,6 +199,7 @@ namespace LxAniDB_WPF
             this.btnAddFiles.IsEnabled = true;
             this.btnClear.IsEnabled = true;
             this.checkWatched.IsEnabled = true;
+            this.checkDeleteFiles.IsEnabled = true;
             this.comboBox.IsEnabled = true;
             this.btnHistory.IsEnabled = true;
             this.btnSettings.IsEnabled = true;
@@ -204,7 +208,7 @@ namespace LxAniDB_WPF
             this.cancelWork = null;
         }
 
-        private void DoWork(CancellationToken token, IProgress<int> progress, string viewed, string state)
+        private void DoWork(CancellationToken token, IProgress<int> progress, string viewed, bool deleteFile, string state)
         {
             foreach (string file in files)
             {
@@ -229,8 +233,6 @@ namespace LxAniDB_WPF
                         // MD4 hash of 9500KB chunk
                         double readBytes = 0;
                         double bufferSize = 9728000;
-                        //Console.WriteLine(sw.ElapsedMilliseconds);
-                        byte[] data = new byte[(int)bufferSize];
                         while (readBytes < size)
                         {
                             if (token.IsCancellationRequested)
@@ -241,24 +243,20 @@ namespace LxAniDB_WPF
                             if (readBytes + bufferSize > size)
                             {
                                 bufferSize = size - readBytes;
-                                data = new byte[(int)bufferSize];
                             }
-                            //Console.WriteLine(sw.ElapsedMilliseconds + "b");
-                            //byte[] data = new byte[(int)bufferSize];
+                            byte[] data = new byte[(int)bufferSize];
                             fs.Read(data, 0, (int)bufferSize);
                             string hash = Hasher.GetHashForMsg(data, HashType.MD4);
                             sb.Append(hash);
-                            //data = null;
+                            data = null;
 
                             // Calculate progress % and report to progressbar
                             readBytes += bufferSize;
                             double p = (readBytes / size) * 100;
                             progress.Report((int)Math.Truncate(p));
-                            //Console.WriteLine(sw.ElapsedMilliseconds + "a");
                         }
-                        data = null;
                         finalHash = Hasher.GetHashForMsg(StringToByteArray(sb.ToString()), HashType.MD4);
-                        WriteLog(finalHash);
+                        //WriteLog(finalHash);
                     }
                     if (token.IsCancellationRequested)
                     {
@@ -277,10 +275,12 @@ namespace LxAniDB_WPF
                             {
                                 history.Add(Path.GetFileName(file));
                             }
-                        }, CancellationToken.None, TaskCreationOptions.None, context);
+                            if (deleteFile)
+                            {
+                                File.Delete(file);
+                            }
+                        },CancellationToken.None, TaskCreationOptions.None, context);
                 }
-                //Console.WriteLine(sw.ElapsedMilliseconds);
-                //sw.Stop();
             }
         }
 
@@ -388,7 +388,7 @@ namespace LxAniDB_WPF
                     case "506":
                         this.sessionKey = string.Empty;
                         WriteLog(MessageBuilder(split, 1));
-                        LoginSendPacket(currentPacket);
+                        SendPacket(currentPacket);
                         break;
                     default:
                         WriteLog(MessageBuilder(split, 0));

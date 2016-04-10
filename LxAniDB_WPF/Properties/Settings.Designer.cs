@@ -100,5 +100,44 @@ namespace LxAniDB_WPF.Properties {
                 this["delay"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool watchedChecked {
+            get {
+                return ((bool)(this["watchedChecked"]));
+            }
+            set {
+                this["watchedChecked"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool deleteChecked {
+            get {
+                return ((bool)(this["deleteChecked"]));
+            }
+            set {
+                this["deleteChecked"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int selectedState {
+            get {
+                return ((int)(this["selectedState"]));
+            }
+            set {
+                this["selectedState"] = value;
+            }
+        }
     }
 }

@@ -154,3 +154,7 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+/packages
+/old_doWork.txt
+/X_ico_test_Ohd_icon.ico
+/xx_icon.ico

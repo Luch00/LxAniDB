@@ -11,6 +11,7 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using Microsoft.Win32;
 using RHash;
+using Microsoft.VisualBasic.FileIO;
 
 namespace LxAniDB_WPF
 {
@@ -277,7 +278,7 @@ namespace LxAniDB_WPF
                             }
                             if (deleteFile)
                             {
-                                File.Delete(file);
+                                FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                             }
                         },CancellationToken.None, TaskCreationOptions.None, context);
                 }

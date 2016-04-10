@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using Microsoft.VisualBasic.FileIO;
 
 namespace LxAniDB_WPF
 {
@@ -320,7 +321,7 @@ namespace LxAniDB_WPF
                     uiContext.Post(x => AddToHistory(file.FileName), null);
                     if (deleteFile)
                     {
-                        File.Delete(file.FilePath);
+                        FileSystem.DeleteFile(file.FilePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         WriteLog("FILE DELETED");
                     }
                 }
